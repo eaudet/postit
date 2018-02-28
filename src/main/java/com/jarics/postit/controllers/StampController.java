@@ -2,9 +2,14 @@ package com.jarics.postit.controllers;
 
 import com.jarics.postit.Note;
 import com.jarics.postit.services.StampService;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -17,7 +22,10 @@ public class StampController {
     StampService stampService;
 
     @RequestMapping(method = RequestMethod.POST)
-    public @ResponseBody String annotate(@RequestBody Note pNote) throws Exception {
+    public @ResponseBody
+    String annotate(@RequestBody Note pNote) throws Exception {
+
+// This works
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(pNote.getDirectory() + "original_upload.pdf");
@@ -26,7 +34,6 @@ public class StampController {
             throw new Exception("You failed to upload because the file was empty.");
         } finally {
             fos.close();
-            fos.flush();
             return "Done";
         }
     }

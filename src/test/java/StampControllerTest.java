@@ -65,36 +65,16 @@ public class StampControllerTest {
     //TODO do a JS page using: http://thoughtfulsoftware.blogspot.ca/2012/12/uploading-binary-files-fun-way.html
     @Test
     public void testAnnotate() {
-
-
-//        try {
-//
-//            Path path = Paths.get("/Users/erickaudet/dev/postit/src/main/resources/original.PDF");
-//            byte[] data = Files.readAllBytes(path);
-//
-//            MockMultipartFile file =
-//                    new MockMultipartFile("file", "original.PDF", null, data);
-//            mockMvc.perform(fileUpload("/notes").file(file)).andExpect(status().isOk());
-//        } catch (Exception e) {
-//
-//        }
-
-
-
-
-
         try {
             File file = new File("/Users/erickaudet/dev/postit/src/main/resources/original.PDF");
             byte[] array = FileUtils.readFileToByteArray(file);
             Note wNote = new Note();
             wNote.setNote("Hello from hell");
-            wNote.setDirectory("//Users/erickaudet/dev/postit/src/main/resources/");
+            wNote.setDirectory("/Users/erickaudet/dev/postit/src/main/resources/");
             wNote.setBytes(array);
             mockMvc.perform(post("/notes").contentType(MediaType.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(wNote))).andExpect(status().isOk());
         } catch (Exception e) {
-
         }
-
     }
 
     /**

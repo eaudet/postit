@@ -110,36 +110,23 @@ public class StampService {
 
     public void annotateAndStore(Note pNote) throws Exception {
 
-        FileOutputStream fos = null;
+        PDDocument wDocument = new PDDocument();
         try {
-            fos = new FileOutputStream(pNote.getDirectory() + "original_upload.pdf");
-            fos.write(pNote.getBytes());
-        } catch (IOException e) {
-            throw new Exception("You failed to upload because the file was empty.");
+            wDocument.setAllSecurityToBeRemoved(true);
+            wDocument.load(new File(pNote.getDirectory() + "original_upload.pdf"));
+            PDPage page = new PDPage();
+            PDFont font = PDType1Font.HELVETICA_BOLD;
+            PDPageContentStream contents = new PDPageContentStream(wDocument, page);
+            contents.beginText();
+            contents.setFont(font, 30);
+            contents.newLineAtOffset(50, 700);
+            contents.showText(pNote.getNote());
+            contents.endText();
+            contents.close();
+            wDocument.addPage(page);
         } finally {
-            fos.close();
-            fos.flush();
+            wDocument.close();
         }
-
-//
-//        PDDocument wDocument = new PDDocument();
-//        try {
-//            wDocument.setAllSecurityToBeRemoved(true);
-//            wDocument.load(new File(pNote.getDirectory() + "original_upload.pdf"));
-//            PDPage page = new PDPage();
-//            PDFont font = PDType1Font.HELVETICA_BOLD;
-//            PDPageContentStream contents = new PDPageContentStream(wDocument, page);
-//            contents.beginText();
-//            contents.setFont(font, 30);
-//            contents.newLineAtOffset(50, 700);
-//            contents.showText(pNote.getNote());
-//            contents.endText();
-//            contents.close();
-//            wDocument.addPage(page);
-//        } finally {
-//            wDocument.close();
-//        }
-//        return wDocument;
     }
 
     private void archive(PDDocument pdDocument, String dir) throws IOException {
