@@ -5,7 +5,6 @@ import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInsta
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.media.MediaHttpUploader;
 import com.google.api.client.http.FileContent;
@@ -14,8 +13,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
-import org.apache.pdfbox.multipdf.Overlay;
+import com.jarics.postit.Note;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -24,7 +22,8 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 
 @Component
@@ -39,77 +38,112 @@ public class StampService {
     private static final String UPLOAD_FILE_PATH = "/Users/erickaudet/dev/postit/pom.xml";
     private static final java.io.File UPLOAD_FILE = new java.io.File(UPLOAD_FILE_PATH);
 
-    /** Directory to store user credentials. */
-    private static final java.io.File DATA_STORE_DIR =
-            new java.io.File(System.getProperty("user.home"), ".store/Jarics");
-
-    private static FileDataStoreFactory dataStoreFactory;
-
-    /** Global instance of the HTTP transport. */
-    private static HttpTransport httpTransport;
-
-    /** Global instance of the JSON factory. */
+    /**
+     * Directory to store user credentials.
+     */
+    private static final java.io.File DATA_STORE_DIR = new java.io.File(System.getProperty("user.home"), ".store/Jarics");
+    /**
+     * Global instance of the JSON factory.
+     */
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-
-    /** Global Drive API client. */
-    private static Drive drive;
-
-    /** Global instance of the scopes required by this quickstart.
-     *
+    /**
+     * Global instance of the scopes required by this quickstart.
+     * <p>
      * If modifying these scopes, delete your previously saved credentials
      * at ~/.credentials/script-java-quickstart
      */
-    private static final List<String> SCOPES =
-            Arrays.asList("https://www.googleapis.com/auth/script.projects");
-
+    private static final List<String> SCOPES = Arrays.asList("https://www.googleapis.com/auth/script.projects");
+    private static FileDataStoreFactory dataStoreFactory;
+    /**
+     * Global instance of the HTTP transport.
+     */
+    private static HttpTransport httpTransport;
+    /**
+     * Global Drive API client.
+     */
+    private static Drive drive;
 
     /**
-     * Add a note on a pdf and sends it to a destination folder.
-     * @param pNotes
-     * @param src
-     * @param dest
+     * Creates an authorized Credential object.
+     *
+     * @return an authorized Credential object.
      * @throws IOException
      */
-    public void manipulatePdf(String pNotes, String src, String dest) throws IOException {
-        //Loading an existing document
-        File file = new File("/Users/erickaudet/dev/postit/src/main/resources/original.PDF");
-        PDDocument originalFile = new PDDocument();
-        originalFile.setAllSecurityToBeRemoved(true);
-        originalFile.load(file);
+    public static Credential authorize() throws IOException {
+        // Load client secrets.
+        InputStream in = StampService.class.getResourceAsStream("/client_secret_479755789778-mdun3jsgmmbha6pcn7r20mil5s3ll3ks.apps.googleusercontent.com.json");
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
-        createOverlay("Hello from hell");
-
+        // Build flow and trigger user authorization request.
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY, clientSecrets, SCOPES).setDataStoreFactory(new FileDataStoreFactory(DATA_STORE_DIR)).setAccessType("offline").build();
+        Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+        System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+        return credential;
     }
 
-    private PDDocument createOverlay(String message) throws IOException {
-            String filename = "/Users/erickaudet/dev/postit/src/main/resources/overlay.pdf";
+    /**
+     * Uploads a file using either resumable or direct media upload.
+     */
+    private static com.google.api.services.drive.model.File uploadFile(boolean useDirectUpload) throws IOException {
+        com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
+        fileMetadata.setName("test");
 
-            PDDocument doc = new PDDocument();
-            try {
-                PDPage page = new PDPage();
-                doc.addPage(page);
+        FileContent mediaContent = new FileContent("image/jpeg", UPLOAD_FILE);
 
-                PDFont font = PDType1Font.HELVETICA_BOLD;
-
-                PDPageContentStream contents = new PDPageContentStream(doc, page);
-                contents.beginText();
-                contents.setFont(font, 30);
-                contents.newLineAtOffset(50, 700);
-                contents.showText(message);
-                contents.endText();
-                contents.close();
-
-                doc.save(filename);
-
-            }
-            finally {
-                doc.close();
-            }
-            return doc;
+        Drive.Files.Create insert = drive.files().create(fileMetadata, mediaContent);
+        MediaHttpUploader uploader = insert.getMediaHttpUploader();
+        uploader.setDirectUploadEnabled(useDirectUpload);
+        uploader.setProgressListener(new FileUploadProgressListener());
+        return insert.execute();
     }
 
-    private void uploadLocal(){
+    /**
+     * Updates the name of the uploaded file to have a "drivetest-" prefix.
+     */
+    private static com.google.api.services.drive.model.File updateFileWithTestSuffix(String id) throws IOException {
+        com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
+        fileMetadata.setName("drivetest-" + UPLOAD_FILE.getName());
 
+        Drive.Files.Update update = drive.files().update(id, fileMetadata);
+        return update.execute();
+    }
+
+    public void annotateAndStore(Note pNote) throws Exception {
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(pNote.getDirectory() + "original_upload.pdf");
+            fos.write(pNote.getBytes());
+        } catch (IOException e) {
+            throw new Exception("You failed to upload because the file was empty.");
+        } finally {
+            fos.close();
+            fos.flush();
+        }
+
+//
+//        PDDocument wDocument = new PDDocument();
+//        try {
+//            wDocument.setAllSecurityToBeRemoved(true);
+//            wDocument.load(new File(pNote.getDirectory() + "original_upload.pdf"));
+//            PDPage page = new PDPage();
+//            PDFont font = PDType1Font.HELVETICA_BOLD;
+//            PDPageContentStream contents = new PDPageContentStream(wDocument, page);
+//            contents.beginText();
+//            contents.setFont(font, 30);
+//            contents.newLineAtOffset(50, 700);
+//            contents.showText(pNote.getNote());
+//            contents.endText();
+//            contents.close();
+//            wDocument.addPage(page);
+//        } finally {
+//            wDocument.close();
+//        }
+//        return wDocument;
+    }
+
+    private void archive(PDDocument pdDocument, String dir) throws IOException {
+        pdDocument.save(dir + "annotated.pdf");
     }
 
     public void upload() {
@@ -120,8 +154,7 @@ public class StampService {
             // authorization
             Credential credential = authorize();
             // set up the global Drive instance
-            drive = new Drive.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(
-                    APPLICATION_NAME).build();
+            drive = new Drive.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
 
 //            // run commands
 //
@@ -147,56 +180,6 @@ public class StampService {
         } catch (Throwable t) {
             t.printStackTrace();
         }
-    }
-
-
-    /**
-     * Creates an authorized Credential object.
-     * @return an authorized Credential object.
-     * @throws IOException
-     */
-    public static Credential authorize() throws IOException {
-        // Load client secrets.
-        InputStream in =
-                StampService.class.getResourceAsStream("/client_secret_479755789778-mdun3jsgmmbha6pcn7r20mil5s3ll3ks.apps.googleusercontent.com.json");
-        GoogleClientSecrets clientSecrets =
-                GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
-        // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow =
-                new GoogleAuthorizationCodeFlow.Builder(
-                        httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
-                        .setDataStoreFactory(new FileDataStoreFactory(DATA_STORE_DIR))
-                        .setAccessType("offline")
-                        .build();
-        Credential credential = new AuthorizationCodeInstalledApp(
-                flow, new LocalServerReceiver()).authorize("user");
-        System.out.println(
-                "Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
-        return credential;
-    }
-
-    /** Uploads a file using either resumable or direct media upload. */
-    private static com.google.api.services.drive.model.File uploadFile(boolean useDirectUpload) throws IOException {
-        com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
-        fileMetadata.setName("test");
-
-        FileContent mediaContent = new FileContent("image/jpeg", UPLOAD_FILE);
-
-        Drive.Files.Create insert = drive.files().create(fileMetadata, mediaContent);
-        MediaHttpUploader uploader = insert.getMediaHttpUploader();
-        uploader.setDirectUploadEnabled(useDirectUpload);
-        uploader.setProgressListener(new FileUploadProgressListener());
-        return insert.execute();
-    }
-
-    /** Updates the name of the uploaded file to have a "drivetest-" prefix. */
-    private static com.google.api.services.drive.model.File updateFileWithTestSuffix(String id) throws IOException {
-        com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
-        fileMetadata.setName("drivetest-" + UPLOAD_FILE.getName());
-
-        Drive.Files.Update update = drive.files().update(id, fileMetadata);
-        return update.execute();
     }
 
 }

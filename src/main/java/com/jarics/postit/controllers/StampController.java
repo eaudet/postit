@@ -5,6 +5,7 @@ import com.jarics.postit.services.StampService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 
@@ -15,16 +16,21 @@ public class StampController {
     @Autowired
     StampService stampService;
 
-    //TODO UNIT TEST
-    @RequestMapping(method = RequestMethod.POST, produces = "application/json")
-    public String create(@RequestBody Note dontknowYet) {
+    @RequestMapping(method = RequestMethod.POST)
+    public @ResponseBody String annotate(@RequestBody Note pNote) throws Exception {
+        FileOutputStream fos = null;
         try {
-            stampService.manipulatePdf("Hello world", "input pdf", "output pdf");
+            fos = new FileOutputStream(pNote.getDirectory() + "original_upload.pdf");
+            fos.write(pNote.getBytes());
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new Exception("You failed to upload because the file was empty.");
+        } finally {
+            fos.close();
+            fos.flush();
+            return "Done";
         }
-        return "not implemented yet";
     }
+
 
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     public @ResponseBody

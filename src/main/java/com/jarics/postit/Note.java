@@ -2,13 +2,13 @@ package com.jarics.postit;
 
 public class Note {
 
-    private long id;
-
     public Note(){
     }
-
+    private long id;
     private String note;
     private String directory;
+    private byte[] bytes = null;
+    private String contentType = null;
 
     public long getId() {
         return id;
@@ -32,5 +32,21 @@ public class Note {
 
     public void setDirectory(String directory) {
         this.directory = directory;
+    }
+
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    public void setBytes(byte[] bytes) {
+        this.bytes = bytes;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 }
