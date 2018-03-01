@@ -14,6 +14,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.jarics.postit.Note;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -22,8 +23,10 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 
 @Component
@@ -108,24 +111,51 @@ public class StampService {
         return update.execute();
     }
 
-    public void annotateAndStore(Note pNote) throws Exception {
+    public String annotateAndStore(Note pNote) throws Exception {
 
-        PDDocument wDocument = new PDDocument();
+        UUID wUuid = UUID.randomUUID();
+        String wUploadFileName = wUuid + "_upload.pdf";
+        String wNoteFileName = wUuid + "_note.pdf";
+        FileOutputStream fos = null;
         try {
-            wDocument.setAllSecurityToBeRemoved(true);
-            wDocument.load(new File(pNote.getDirectory() + "original_upload.pdf"));
+            fos = new FileOutputStream(pNote.getDirectory() + wUploadFileName);
+            fos.write(pNote.getBytes());
+            fos.close();
+            // create note pdf
+            // Create a document and add a page to it
+            PDDocument document = new PDDocument();
             PDPage page = new PDPage();
+            document.addPage( page );
             PDFont font = PDType1Font.HELVETICA_BOLD;
-            PDPageContentStream contents = new PDPageContentStream(wDocument, page);
-            contents.beginText();
-            contents.setFont(font, 30);
-            contents.newLineAtOffset(50, 700);
-            contents.showText(pNote.getNote());
-            contents.endText();
-            contents.close();
-            wDocument.addPage(page);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page);
+            contentStream.beginText();
+            contentStream.setFont( font, 12 );
+            contentStream.moveTextPositionByAmount( 100, 700 );
+            contentStream.drawString( pNote.getNote() );
+            contentStream.endText();
+            contentStream.close();
+            document.save( pNote.getDirectory() + wNoteFileName);
+            document.close();
+            // merge
+            List<InputStream> locations=new ArrayList<>();
+            locations.add(new FileInputStream(pNote.getDirectory() + wNoteFileName));
+            locations.add(new FileInputStream(pNote.getDirectory() + wUploadFileName));
+            PDFMergerUtility PDFmerger = new PDFMergerUtility();
+            OutputStream out = new FileOutputStream(pNote.getDirectory() + "merged.pdf");
+            PDFmerger.addSources(locations);
+            PDFmerger.setDestinationStream(out);
+            PDFmerger.mergeDocuments();
+            System.out.println("Documents merged");
+            //delete intermediate files
+            File wFile = new File(pNote.getDirectory() + wNoteFileName);
+            wFile.delete();
+            wFile = new File(pNote.getDirectory() + wUploadFileName);
+            wFile.delete();
+
+        } catch (IOException e) {
+            throw new Exception("You failed to upload because the file was empty.");
         } finally {
-            wDocument.close();
+            return "Done";
         }
     }
 

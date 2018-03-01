@@ -2,16 +2,20 @@ package com.jarics.postit.controllers;
 
 import com.jarics.postit.Note;
 import com.jarics.postit.services.StampService;
+import org.apache.commons.io.FileUtils;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 
 @RestController
@@ -22,20 +26,8 @@ public class StampController {
     StampService stampService;
 
     @RequestMapping(method = RequestMethod.POST)
-    public @ResponseBody
-    String annotate(@RequestBody Note pNote) throws Exception {
-
-// This works
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(pNote.getDirectory() + "original_upload.pdf");
-            fos.write(pNote.getBytes());
-        } catch (IOException e) {
-            throw new Exception("You failed to upload because the file was empty.");
-        } finally {
-            fos.close();
-            return "Done";
-        }
+    public @ResponseBody String annotate(@RequestBody Note pNote) throws Exception {
+        return stampService.annotateAndStore(pNote);
     }
 
 
