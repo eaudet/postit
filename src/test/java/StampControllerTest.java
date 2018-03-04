@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -21,7 +22,9 @@ import java.nio.file.Paths;
 import java.util.Base64;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -49,20 +52,7 @@ public class StampControllerTest {
     public void after() throws Exception {
     }
 
-    /**
-     * Method: create(@RequestBody Person pPerson)
-     */
-    @Test
-    public void testCreate() throws Exception {
-        // mockMvc.perform(post("/notes").contentType(MediaType.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(wPerson))).andExpect(status().isOk());
-        Note wNote = new Note();
-        wNote.setNote("Hello from hell");
-        mockMvc.perform(post("/notes").contentType(MediaType.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(wNote))).andExpect(status().isOk());
-    }
 
-
-
-    //TODO do a JS page using: http://thoughtfulsoftware.blogspot.ca/2012/12/uploading-binary-files-fun-way.html
     @Test
     public void testAnnotate() {
         try {
@@ -70,6 +60,7 @@ public class StampControllerTest {
             byte[] array = FileUtils.readFileToByteArray(file);
             Note wNote = new Note();
             wNote.setNote("Hello from hell");
+            wNote.setFileName("Impot CJMS 2017.pdf");
             wNote.setDirectory("/Users/erickaudet/dev/postit/src/main/resources/");
             wNote.setBytes(array);
             mockMvc.perform(post("/notes").contentType(MediaType.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(wNote))).andExpect(status().isOk());
@@ -77,14 +68,16 @@ public class StampControllerTest {
         }
     }
 
-    /**
-     * Method: find(@RequestParam("name") String pName)
-     */
-    @Test
-    public void testFind() throws Exception {
-        Assert.assertTrue(true);
-//TODO: Test goes here... 
-    }
+
+//    @Test
+//    public void testGetStuff() throws Exception {
+//        Note wNote = new Note();
+//        wNote.setNote("Hello from hell");
+//        wNote.setFileName("Impot CJMS 2017.pdf");
+//
+//        mockMvc.perform(get("/notes?note={note}", wNote)).andExpect(status().isOk()).andDo(MockMvcResultHandlers.print()).andExpect(jsonPath("$[0].name").value("Got this"));
+//    }
+
 
 
 } 
