@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../postitwebapp/postit.iml" filepath="$PROJECT_DIR$/../postitwebapp/postit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/postit-webapp.iml" filepath="$PROJECT_DIR$/postit-webapp.iml" />
     </modules>
   </component>
 </project>
