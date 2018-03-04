@@ -7,6 +7,7 @@ public class Note {
     private long id;
     private String note;
     private String directory;
+    private String fileName;
     private byte[] bytes = null;
     private String contentType = null;
 
@@ -48,5 +49,14 @@ public class Note {
 
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

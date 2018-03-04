@@ -24,6 +24,7 @@ public class StampController {
 
     @Autowired
     StampService stampService;
+    private Note pName;
 
     @RequestMapping(method = RequestMethod.POST)
     public @ResponseBody String annotate(@RequestBody Note pNote) throws Exception {
@@ -33,7 +34,8 @@ public class StampController {
 
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     public @ResponseBody
-    String find(@RequestParam("name") String pName) {
+    String find(@RequestParam("note") Note pNote) {
+        String wNote = pNote.getNote();
         return "not implemented yet";
     }
 
