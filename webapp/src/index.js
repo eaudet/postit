@@ -2,7 +2,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import Square from './components/square.js'
+import {Square, calculateWinner } from './components/square.js'
+
 
 class Board extends React.Component {
 
@@ -10,15 +11,20 @@ class Board extends React.Component {
     super(props);
     this.state = {
       squares: Array(9).fill(null),
+      xIsNext: true,
     };
   }
 
-//TODO https://reactjs.org/tutorial/tutorial.html#functional-components
+
+//TODO https://reactjs.org/tutorial/tutorial.html#storing-a-history
 
   handleClick(i) {
     const squares = this.state.squares.slice();
-    squares[i] = 'X';
-    this.setState({squares: squares});
+    if (calculateWinner(squares) || squares[i]) {
+          return;
+    }
+    squares[i] = this.state.xIsNext ? 'X' : 'O';
+    this.setState({squares: squares,  xIsNext: !this.state.xIsNext});
   }
 
   renderSquare(i) {
@@ -31,7 +37,14 @@ class Board extends React.Component {
   }
 
   render() {
-    const status = 'Next player: X';
+    const winner = calculateWinner(this.state.squares);
+    let status;
+    if (winner) {
+      status = 'Winner: ' + winner;
+    } else {
+      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+    }
+
 
     return (
       <div>
