@@ -1,1 +1,4 @@
 /target/
+/bin/
+/webapp/node_ modules/
+*DS_Store
