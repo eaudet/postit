@@ -3,10 +3,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import {Board} from './components/board.js'
+import {SimpleReactFileUpload} from './components/react-file-upload.js'
 import {calculateWinner} from './components/square.js'
-
-
-//TODO https://reactjs.org/tutorial/tutorial.html#showing-the-moves
 
 class Game extends React.Component {
 
@@ -46,7 +44,16 @@ class Game extends React.Component {
         });
     }
 
-  render() {
+    render(){
+        return (
+            <div className="game">
+                <SimpleReactFileUpload
+                />
+            </div>
+        );
+    }
+
+  render_() {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);

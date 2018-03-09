@@ -33,10 +33,10 @@ public class StampController {
 
 
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
-    public @ResponseBody
-    String find(@RequestParam("note") Note pNote) {
-        String wNote = pNote.getNote();
-        return "not implemented yet";
+    public @ResponseBody Note find(@RequestParam("note") String pNote) {
+        Note wNote = new Note();
+        wNote.setNote("Hello Satan!");
+        return wNote;
     }
 
 

@@ -69,14 +69,10 @@ public class StampControllerTest {
     }
 
 
-//    @Test
-//    public void testGetStuff() throws Exception {
-//        Note wNote = new Note();
-//        wNote.setNote("Hello from hell");
-//        wNote.setFileName("Impot CJMS 2017.pdf");
-//
-//        mockMvc.perform(get("/notes?note={note}", wNote)).andExpect(status().isOk()).andDo(MockMvcResultHandlers.print()).andExpect(jsonPath("$[0].name").value("Got this"));
-//    }
+    @Test
+    public void testGetStuff() throws Exception {
+        mockMvc.perform(get("/notes?note={note}", "Hello from hell")).andExpect(status().isOk()).andDo(MockMvcResultHandlers.print()).andExpect(jsonPath("$.note").value("Hello Satan!"));
+    }
 
 
 
