@@ -26,12 +26,13 @@ public class StampController {
     StampService stampService;
     private Note pName;
 
+    @CrossOrigin
     @RequestMapping(method = RequestMethod.POST)
     public @ResponseBody String annotate(@RequestBody Note pNote) throws Exception {
         return stampService.annotateAndStore(pNote);
     }
 
-
+    @CrossOrigin
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     public @ResponseBody Note find(@RequestParam("note") String pNote) {
         Note wNote = new Note();

@@ -1,5 +1,5 @@
 import React from 'react'
-import axios, { post } from 'axios';
+import axios, { post, then } from 'axios';
 
 export class SimpleReactFileUpload extends React.Component {
 
@@ -10,31 +10,33 @@ export class SimpleReactFileUpload extends React.Component {
     }
     this.onFormSubmit = this.onFormSubmit.bind(this)
     this.onChange = this.onChange.bind(this)
-    this.fileUpload = this.fileUpload.bind(this)
+    this.sendFile = this.sendFile.bind(this)
   }
   onFormSubmit(e){
     e.preventDefault() // Stop form submit
-    this.fileUpload(this.state.file).then((response)=>{
-      console.log(response.data);
-    })
+    this.sendFile(this.state.file)
   }
+
   onChange(e) {
     this.setState({file:e.target.files[0]})
   }
-  fileUpload(file){
-    const url = 'http://localhost:8080/notes';
-    post(url, {
-        firstName: 'Fred',
-        lastName: 'Flintstone'
-        })
-        .then(function (response) {
-            console.log(response);
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
-        }
 
+// TODO how to send the file as byte array
+    sendFile(file) {
+       axios.post('http://localhost:8080/postit/notes/', {
+           note: 'Hello Satan!',
+           directory: 'aqq',
+           fileName: 'aqaqa',
+           bytes: 'dewded',
+           contentType: 'swsw',
+         })
+         .then(function (response) {
+           console.log(response);
+         })
+         .catch(function (error) {
+           console.log(error);
+       });
+    }
 
   render() {
     return (

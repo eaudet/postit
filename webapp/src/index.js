@@ -5,6 +5,7 @@ import './index.css';
 import {Board} from './components/board.js'
 import {SimpleReactFileUpload} from './components/react-file-upload.js'
 import {calculateWinner} from './components/square.js'
+import axios, { post, then } from 'axios';
 
 class Game extends React.Component {
 
