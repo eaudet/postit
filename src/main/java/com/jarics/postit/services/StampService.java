@@ -96,6 +96,9 @@ public class StampService {
 
     public String annotateAndStore(Note pNote) throws Exception {
 
+        //TODO handle all in streaming no files on disk....this is not scallable.
+        //TODO why ReactJs is sending a file much bigger bo
+
         UUID wUuid = UUID.randomUUID();
         String wUploadFileName = wUuid + "_upload.pdf";
         String wNoteFileName = wUuid + "_note.pdf";
