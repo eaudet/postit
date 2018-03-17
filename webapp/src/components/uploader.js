@@ -13,20 +13,26 @@ export default class Basic extends React.Component {
     this.setState({
       files
     });
-    //TODO bytes is null
-    const reader = new FileReader();
-    fetch('http://localhost:8080/postit/notes/upload', {
-    	method: 'post',
-    	headers: new Headers({
-                 		'Content-Type': 'application/json;charset=UTF-8'
-                 	}),
-    	body: JSON.stringify({
-    		note: 'Une note',
-    		fileName: 'Some dammed file.pdf',
-    		directory: '/Users/erickaudet/dev/postit',
-    		bytes: reader.readAsBinaryString(files[0])
-    	})
-    });
+    //TODO check byte size.....still not working
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(files[0]);
+    reader.onload = function() {
+      var arrayBuffer = reader.result
+      var allBytes = new Uint8Array(arrayBuffer);
+        fetch('http://localhost:8080/postit/notes/upload', {
+            method: 'post',
+            headers: new Headers({
+                            'Content-Type': 'application/json;charset=UTF-8'
+                        }),
+            body: JSON.stringify({
+                note: 'Une note',
+                fileName: 'Some dammed file.pdf',
+                directory: '/Users/erickaudet/dev/postit',
+                bytes: btoa(allBytes),
+            })
+        });
+    }
+
   }
 
   render() {
