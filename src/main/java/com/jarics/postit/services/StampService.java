@@ -18,6 +18,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -94,19 +95,19 @@ public class StampService {
     }
 
 
-    public String annotateAndStore(Note pNote) throws Exception {
+    public String annotateAndStore(Note pNote, MultipartFile pFile) throws Exception {
 
         //TODO handle all in streaming no files on disk....this is not scallable.
         //TODO why ReactJs is sending a file much bigger bo
 
         UUID wUuid = UUID.randomUUID();
-        String wUploadFileName = wUuid + "_upload.pdf";
+        String wUploadFileName = wUuid + "_"+pFile.getOriginalFilename();
         String wNoteFileName = wUuid + "_note.pdf";
         String wMergedFileName = wUuid + "_merged.pdf";
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(wUploadFileName);
-            fos.write(pNote.getBytes());
+            fos.write(pFile.getBytes());
             fos.close();
             // create note pdf
             // Create a document and add a page to it

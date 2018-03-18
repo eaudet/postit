@@ -1,6 +1,5 @@
 import com.jarics.postit.Application;
 import com.jarics.postit.Note;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,14 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.io.File;
+import java.io.FileInputStream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -46,19 +49,25 @@ public class StampControllerTest {
     }
 
 
+    //TODO https://stackoverflow.com/questions/21800726/using-spring-mvc-test-to-unit-test-multipart-post-request
+
     @Test
-    public void testAnnotate() {
-        try {
-            File file = new File("/Users/erickaudet/dev/postit/src/main/resources/original.pdf");
-            byte[] array = FileUtils.readFileToByteArray(file);
-            Note wNote = new Note();
-            wNote.setNote("Hello from hell");
-            wNote.setFileName("Impot CJMS 2017.pdf");
-            wNote.setDirectory("/Users/erickaudet/dev/postit");
-            wNote.setBytes(array);
-            mockMvc.perform(post("/notes/upload").contentType(MediaType.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(wNote))).andExpect(status().isOk());
-        } catch (Exception e) {
-        }
+    public void test() throws Exception {
+
+        File file = new File("/Users/erickaudet/dev/postit/src/main/resources/original.pdf");
+        FileInputStream fis = new FileInputStream(file);
+        MockMultipartFile firstFile = new MockMultipartFile("data", "original.pdf", MediaType.APPLICATION_PDF_VALUE, fis);
+        Note wNote = new Note();
+        wNote.setNote("Hello from hell");
+        wNote.setDirectory("/Users/erickaudet/dev/postit");
+        MockMultipartFile jsonFile = new MockMultipartFile("note", "note", "application/json", TestUtil.convertObjectToJsonBytes(wNote).getBytes());
+
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/notes/upload")
+                .file(firstFile)
+                .file(jsonFile)
+                .param("some-random", "4"))
+                .andExpect(status().is(200))
+                .andExpect(content().string("success"));
     }
 
 
