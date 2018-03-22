@@ -34,19 +34,20 @@ public class StampController {
         return wNote;
     }
 
+    //TODO should return the file. The use should be able to redirect to the cloud drive of his choice...
     @CrossOrigin
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     @ResponseBody
-    public String saveAuto(
-            @RequestPart(value = "note") Note pNote,
-            @RequestParam(value = "some-random") String random,
+    public String upload(
+            @RequestPart(value = "note") String pNote,
+            @RequestPart(value = "directory") String pDirectory,
             @RequestParam(value = "data", required = false) List<MultipartFile> files) throws Exception {
-        System.out.println(random);
-        System.out.println(pNote.getNote());
+        System.out.println(pNote);
+        System.out.println(pDirectory);
         for (MultipartFile file : files) {
             System.out.println(file.getOriginalFilename());
         }
-        stampService.annotateAndStore(pNote, files.get(0));
+        stampService.annotateAndStore(pNote, pDirectory, files.get(0));
         return "success";
     }
 

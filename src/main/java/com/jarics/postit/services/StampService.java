@@ -82,7 +82,7 @@ public class StampService {
     /**
      * Uploads a file using either resumable or direct media upload.
      */
-    private static com.google.api.services.drive.model.File uploadFile(boolean useDirectUpload, File pFile, Note pNote) throws IOException {
+    private static com.google.api.services.drive.model.File uploadFile(boolean useDirectUpload, File pFile, String pNote) throws IOException {
 //        File fileMetadata = new File();
 //        fileMetadata.setName("photo.jpg");
 //        java.io.File filePath = new java.io.File("files/photo.jpg");
@@ -95,7 +95,7 @@ public class StampService {
     }
 
 
-    public String annotateAndStore(Note pNote, MultipartFile pFile) throws Exception {
+    public String annotateAndStore(String pNote, String pDirectory, MultipartFile pFile) throws Exception {
 
         //TODO handle all in streaming no files on disk....this is not scallable.
         //TODO why ReactJs is sending a file much bigger bo
@@ -119,7 +119,7 @@ public class StampService {
             contentStream.beginText();
             contentStream.setFont( font, 12 );
             contentStream.moveTextPositionByAmount( 100, 700 );
-            contentStream.drawString( pNote.getNote() );
+            contentStream.drawString( pNote );
             contentStream.endText();
             contentStream.close();
             document.save( wNoteFileName);
