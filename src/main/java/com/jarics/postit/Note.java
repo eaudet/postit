@@ -2,11 +2,11 @@ package com.jarics.postit;
 
 public class Note {
 
-    public Note(){
-    }
     private long id;
     private String note;
     private String directory;
+    public Note() {
+    }
 
     public long getId() {
         return id;

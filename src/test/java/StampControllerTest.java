@@ -49,7 +49,7 @@ public class StampControllerTest {
     }
 
 
-    //TODO https://stackoverflow.com/questions/21800726/using-spring-mvc-test-to-unit-test-multipart-post-request
+    //TODO adjust testing
 
     @Test
     public void test() throws Exception {
@@ -57,14 +57,9 @@ public class StampControllerTest {
         File file = new File("/Users/erickaudet/dev/postit/src/main/resources/original.pdf");
         FileInputStream fis = new FileInputStream(file);
         MockMultipartFile firstFile = new MockMultipartFile("data", "original.pdf", MediaType.APPLICATION_PDF_VALUE, fis);
-//        Note wNote = new Note();
-//        wNote.setNote("Hello from hell");
-//        wNote.setDirectory("/Users/erickaudet/dev/postit");
-//        MockMultipartFile jsonFile = new MockMultipartFile("note", "note", "application/json", TestUtil.convertObjectToJsonBytes(wNote).getBytes());
-
         mockMvc.perform(MockMvcRequestBuilders.fileUpload("/notes/upload")
                 .file(firstFile)
-                .param("note", "une notes"))
+                .param("note", "une notes").param("directory", "/Users/erickaudet/dev/postit"))
                 .andExpect(status().is(200))
                 .andExpect(content().string("success"));
     }

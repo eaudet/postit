@@ -10,7 +10,6 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
-import com.jarics.postit.Note;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -101,7 +100,7 @@ public class StampService {
         //TODO why ReactJs is sending a file much bigger bo
 
         UUID wUuid = UUID.randomUUID();
-        String wUploadFileName = wUuid + "_"+pFile.getOriginalFilename();
+        String wUploadFileName = wUuid + "_" + pFile.getOriginalFilename();
         String wNoteFileName = wUuid + "_note.pdf";
         String wMergedFileName = wUuid + "_merged.pdf";
         FileOutputStream fos = null;
@@ -113,19 +112,19 @@ public class StampService {
             // Create a document and add a page to it
             PDDocument document = new PDDocument();
             PDPage page = new PDPage();
-            document.addPage( page );
+            document.addPage(page);
             PDFont font = PDType1Font.HELVETICA_BOLD;
             PDPageContentStream contentStream = new PDPageContentStream(document, page);
             contentStream.beginText();
-            contentStream.setFont( font, 12 );
-            contentStream.moveTextPositionByAmount( 100, 700 );
-            contentStream.drawString( pNote );
+            contentStream.setFont(font, 12);
+            contentStream.moveTextPositionByAmount(100, 700);
+            contentStream.drawString(pNote);
             contentStream.endText();
             contentStream.close();
-            document.save( wNoteFileName);
+            document.save(wNoteFileName);
             document.close();
             // merge
-            List<InputStream> locations=new ArrayList<>();
+            List<InputStream> locations = new ArrayList<>();
             locations.add(new FileInputStream(wNoteFileName));
             locations.add(new FileInputStream(wUploadFileName));
             PDFMergerUtility PDFmerger = new PDFMergerUtility();
@@ -135,12 +134,12 @@ public class StampService {
             PDFmerger.mergeDocuments();
             System.out.println("Documents merged");
             //delete intermediate files
-            File wFile = new File( wNoteFileName);
+            File wFile = new File(wNoteFileName);
             wFile.delete();
             wFile = new File(wUploadFileName);
             wFile.delete();
             //store in destination
-            uploadFile(true, new File( wMergedFileName ), pNote);
+            uploadFile(true, new File(wMergedFileName), pNote);
 
         } catch (IOException e) {
             throw new Exception("You failed to upload because the file was empty.");
@@ -148,7 +147,6 @@ public class StampService {
             return "Done";
         }
     }
-
 
 
 }

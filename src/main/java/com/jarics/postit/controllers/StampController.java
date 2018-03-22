@@ -5,7 +5,6 @@ import com.jarics.postit.services.StampService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -16,14 +15,6 @@ public class StampController {
 
     @Autowired
     StampService stampService;
-    private Note pName;
-
-//    @CrossOrigin
-//    @RequestMapping(value = "/upload_", method = RequestMethod.POST)
-//    public @ResponseBody
-//    String annotate(@RequestBody Note pNote) throws Exception {
-//        return stampService.annotateAndStore(pNote);
-//    }
 
     @CrossOrigin
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
@@ -38,15 +29,9 @@ public class StampController {
     @CrossOrigin
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     @ResponseBody
-    public String upload(
-            @RequestPart(value = "note") String pNote,
-            @RequestPart(value = "directory") String pDirectory,
-            @RequestParam(value = "data", required = false) List<MultipartFile> files) throws Exception {
-        System.out.println(pNote);
-        System.out.println(pDirectory);
-        for (MultipartFile file : files) {
-            System.out.println(file.getOriginalFilename());
-        }
+    public String upload(@RequestParam(value = "note") String pNote,
+                         @RequestParam(value = "directory") String pDirectory,
+                         @RequestParam(value = "data", required = false) List<MultipartFile> files) throws Exception {
         stampService.annotateAndStore(pNote, pDirectory, files.get(0));
         return "success";
     }

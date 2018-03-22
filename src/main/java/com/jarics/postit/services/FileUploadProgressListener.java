@@ -23,8 +23,7 @@ public class FileUploadProgressListener implements MediaHttpUploaderProgressList
                 View.header2("Upload Initiation is Complete.");
                 break;
             case MEDIA_IN_PROGRESS:
-                View.header2("Upload is In Progress: "
-                        + NumberFormat.getPercentInstance().format(uploader.getProgress()));
+                View.header2("Upload is In Progress: " + NumberFormat.getPercentInstance().format(uploader.getProgress()));
                 break;
             case MEDIA_COMPLETE:
                 View.header2("Upload is Complete!");
