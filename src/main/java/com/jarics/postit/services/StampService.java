@@ -81,7 +81,7 @@ public class StampService {
     /**
      * Uploads a file using either resumable or direct media upload.
      */
-    private static com.google.api.services.drive.model.File uploadFile(boolean useDirectUpload, File pFile, String pNote) throws IOException {
+    private static com.google.api.services.drive.model.File uploadFile(boolean useDirectUpload, File pFile) throws IOException {
 //        File fileMetadata = new File();
 //        fileMetadata.setName("photo.jpg");
 //        java.io.File filePath = new java.io.File("files/photo.jpg");
@@ -93,6 +93,66 @@ public class StampService {
         return null;
     }
 
+    public String mergeAndStore(String pNote, String pDirectory, MultipartFile pFileA, MultipartFile pFileB) throws Exception {
+
+        //TODO handle all in streaming no files on disk....this is not scallable.
+        //TODO why ReactJs is sending a file much bigger bo
+
+        UUID wUuid = UUID.randomUUID();
+        String wUploadFileAName = wUuid + "_" + pFileA.getOriginalFilename();
+        String wUploadFileBName = wUuid + "_" + pFileB.getOriginalFilename();
+        String wNoteFileName = wUuid + "_note.pdf";
+        String wMergedFileName = wUuid + "_merged.pdf";
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(wUploadFileAName);
+            fos.write(pFileA.getBytes());
+            fos.close();
+            fos = new FileOutputStream(wUploadFileBName);
+            fos.write(pFileB.getBytes());
+            fos.close();
+            // create note pdf
+            // Create a document and add a page to it
+            PDDocument document = new PDDocument();
+            PDPage page = new PDPage();
+            document.addPage(page);
+            PDFont font = PDType1Font.HELVETICA_BOLD;
+            PDPageContentStream contentStream = new PDPageContentStream(document, page);
+            contentStream.beginText();
+            contentStream.setFont(font, 12);
+            contentStream.moveTextPositionByAmount(100, 700);
+            contentStream.drawString(pNote);
+            contentStream.endText();
+            contentStream.close();
+            document.save(wNoteFileName);
+            document.close();
+            // merge
+            List<InputStream> locations = new ArrayList<>();
+            locations.add(new FileInputStream(wNoteFileName));
+            locations.add(new FileInputStream(wUploadFileAName));
+            locations.add(new FileInputStream(wUploadFileBName));
+            PDFMergerUtility PDFmerger = new PDFMergerUtility();
+            OutputStream out = new FileOutputStream(wMergedFileName);
+            PDFmerger.addSources(locations);
+            PDFmerger.setDestinationStream(out);
+            PDFmerger.mergeDocuments();
+            System.out.println("Documents merged");
+            //delete intermediate files
+            File wFile = new File(wNoteFileName);
+            wFile.delete();
+            wFile = new File(wUploadFileAName);
+            wFile.delete();
+            wFile = new File(wUploadFileBName);
+            wFile.delete();
+            //store in destination
+            uploadFile(true, new File(wMergedFileName));
+
+        } catch (IOException e) {
+            throw new Exception("You failed to upload because the file was empty.");
+        } finally {
+            return "Done";
+        }
+    }
 
     public String annotateAndStore(String pNote, String pDirectory, MultipartFile pFile) throws Exception {
 
@@ -139,7 +199,7 @@ public class StampService {
             wFile = new File(wUploadFileName);
             wFile.delete();
             //store in destination
-            uploadFile(true, new File(wMergedFileName), pNote);
+            uploadFile(true, new File(wMergedFileName));
 
         } catch (IOException e) {
             throw new Exception("You failed to upload because the file was empty.");

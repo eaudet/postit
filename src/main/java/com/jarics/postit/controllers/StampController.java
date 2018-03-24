@@ -27,12 +27,22 @@ public class StampController {
 
     //TODO should return the file. The use should be able to redirect to the cloud drive of his choice...
     @CrossOrigin
-    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    @RequestMapping(value = "/annotate", method = RequestMethod.POST)
     @ResponseBody
-    public String upload(@RequestParam(value = "note") String pNote,
-                         @RequestParam(value = "directory") String pDirectory,
-                         @RequestParam(value = "data", required = false) List<MultipartFile> files) throws Exception {
+    public String annotate(@RequestParam(value = "note") String pNote,
+                           @RequestParam(value = "directory") String pDirectory,
+                           @RequestParam(value = "data", required = false) List<MultipartFile> files) throws Exception {
         stampService.annotateAndStore(pNote, pDirectory, files.get(0));
+        return "success";
+    }
+
+    @CrossOrigin
+    @RequestMapping(value = "/merge", method = RequestMethod.POST)
+    @ResponseBody
+    public String merge(@RequestParam(value = "note") String pNote,
+                        @RequestParam(value = "directory") String pDirectory,
+                        @RequestParam(value = "data", required = false) List<MultipartFile> files) throws Exception {
+        stampService.mergeAndStore(pNote, pDirectory, files.get(0), files.get(1));
         return "success";
     }
 

@@ -57,7 +57,7 @@ public class StampControllerTest {
         File file = new File("/Users/erickaudet/dev/postit/src/main/resources/original.pdf");
         FileInputStream fis = new FileInputStream(file);
         MockMultipartFile firstFile = new MockMultipartFile("data", "original.pdf", MediaType.APPLICATION_PDF_VALUE, fis);
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/notes/upload")
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/notes/annotate")
                 .file(firstFile)
                 .param("note", "une notes").param("directory", "/Users/erickaudet/dev/postit"))
                 .andExpect(status().is(200))
