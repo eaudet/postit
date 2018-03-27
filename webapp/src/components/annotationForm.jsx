@@ -16,8 +16,20 @@ export default class AnnotationForm extends React.Component{
     onSubmit = e =>{
         e.preventDefault();
         console.log(this.state);
+        let formData = new FormData();
+        // Fields in the post
+        formData.append('data', this.state.files[0]);
+        formData.append('note', this.state.note);
+        formData.append('directory', this.state.directory);
+        fetch('http://localhost:8080/postit/notes/annotate', {
+            method: 'post',
+            body: formData
+        }).then(response => {
+            console.log("image uploaded")
+        }).catch(err => {
+            console.log(err)
+        });
     };
-
     onDrop(files) {
         this.setState({
             files
