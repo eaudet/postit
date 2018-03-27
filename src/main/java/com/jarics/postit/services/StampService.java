@@ -102,7 +102,7 @@ public class StampService {
         String wUploadFileAName = wUuid + "_" + pFileA.getOriginalFilename();
         String wUploadFileBName = wUuid + "_" + pFileB.getOriginalFilename();
         String wNoteFileName = wUuid + "_note.pdf";
-        String wMergedFileName = wUuid + "_merged.pdf";
+        String wMergedFileName = pFileA.getOriginalFilename() + "_merged.pdf";
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(wUploadFileAName);

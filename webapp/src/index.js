@@ -1,16 +1,21 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import Basic from './components/uploader.js'
+// import Basic from './components/uploader.jsx'
+import AnnotationForm from './components/annotationForm.jsx'
 
-class Game extends React.Component {
+class Postit extends React.Component {
 
-    render(){
+    render() {
         return (
             <div className="game">
-                <Basic note="hello world" id="112131"
-                />
+                {/*<div>*/}
+                    {/*<Basic note="hello world" id="112131"*/}
+                    {/*/>*/}
+                {/*</div>*/}
+                <div>
+                    <AnnotationForm />
+                </div>
             </div>
         );
     }
@@ -20,6 +25,6 @@ class Game extends React.Component {
 // ========================================
 
 ReactDOM.render(
-  <Game/>,
-  document.getElementById('root')
+    <Postit/>,
+    document.getElementById('root')
 );
