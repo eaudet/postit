@@ -1,23 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-// import Basic from './components/uploader.jsx'
-import AnnotationForm from './components/annotationForm.jsx'
+import AnnotationForm from './components/annotationForm.jsx';
+// import App from 'jarics-react-components';
 
 class Postit extends React.Component {
 
     render() {
-        return (
-            <div className="game">
-                {/*<div>*/}
-                    {/*<Basic note="hello world" id="112131"*/}
-                    {/*/>*/}
-                {/*</div>*/}
-                <div>
-                    <AnnotationForm />
-                </div>
+        return <div className="game">
+            <div>
+                <AnnotationForm/>
             </div>
-        );
+            {/*<div>*/}
+                {/*<App/>*/}
+            {/*</div>*/}
+        </div>;
     }
 
 }

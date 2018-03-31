@@ -12,6 +12,7 @@ export default class AnnotationForm extends React.Component{
         this.setState({
             [e.target.name]: e.target.value
         });
+
     };
     onSubmit = e =>{
         e.preventDefault();
@@ -25,7 +26,7 @@ export default class AnnotationForm extends React.Component{
             method: 'post',
             body: formData
         }).then(response => {
-            console.log("image uploaded")
+            console.log(response)
         }).catch(err => {
             console.log(err)
         });
@@ -35,8 +36,17 @@ export default class AnnotationForm extends React.Component{
             files
         });
     }
+    onClear = e => {
+        e.preventDefault();
+        this.setState({
+            note: "",
+            directory: "",
+            files: "",
+        });
+    };
     render(){
         return <form>
+            <h2>Annotate a pdf</h2>
             <input
                 name= "note"
                 placeholder='Note'
@@ -54,7 +64,13 @@ export default class AnnotationForm extends React.Component{
                 <p>{this.props.note}</p>
                 <p>{this.props.id}</p>
             </Dropzone>
-            <button onClick={e => this.onSubmit(e)}>Submit</button>
+            <br />
+                <button onClick={e => this.onClear(e)}>Clear</button>
+                <button onClick={e => this.onSubmit(e)}>Submit</button>
+            <br />
+            <p>
+                {JSON.stringify(this.state, null, 2)}
+            </p>
         </form>;
     }
 

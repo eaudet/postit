@@ -14,6 +14,7 @@ import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.stereotype.Component;
@@ -93,23 +94,19 @@ public class StampService {
         return null;
     }
 
-    public String mergeAndStore(String pNote, String pDirectory, MultipartFile pFileA, MultipartFile pFileB) throws Exception {
+    public File mergeAndStore(String pNote, String pDirectory, MultipartFile pFileA) throws Exception {
 
         //TODO handle all in streaming no files on disk....this is not scallable.
         //TODO why ReactJs is sending a file much bigger bo
 
         UUID wUuid = UUID.randomUUID();
         String wUploadFileAName = wUuid + "_" + pFileA.getOriginalFilename();
-        String wUploadFileBName = wUuid + "_" + pFileB.getOriginalFilename();
         String wNoteFileName = wUuid + "_note.pdf";
         String wMergedFileName = pFileA.getOriginalFilename() + "_merged.pdf";
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(wUploadFileAName);
             fos.write(pFileA.getBytes());
-            fos.close();
-            fos = new FileOutputStream(wUploadFileBName);
-            fos.write(pFileB.getBytes());
             fos.close();
             // create note pdf
             // Create a document and add a page to it
@@ -130,7 +127,6 @@ public class StampService {
             List<InputStream> locations = new ArrayList<>();
             locations.add(new FileInputStream(wNoteFileName));
             locations.add(new FileInputStream(wUploadFileAName));
-            locations.add(new FileInputStream(wUploadFileBName));
             PDFMergerUtility PDFmerger = new PDFMergerUtility();
             OutputStream out = new FileOutputStream(wMergedFileName);
             PDFmerger.addSources(locations);
@@ -142,23 +138,44 @@ public class StampService {
             wFile.delete();
             wFile = new File(wUploadFileAName);
             wFile.delete();
-            wFile = new File(wUploadFileBName);
-            wFile.delete();
             //store in destination
-            uploadFile(true, new File(wMergedFileName));
+            return new File(wMergedFileName);
 
         } catch (IOException e) {
             throw new Exception("You failed to upload because the file was empty.");
-        } finally {
-            return "Done";
         }
     }
 
-    public String annotateAndStore(String pNote, String pDirectory, MultipartFile pFile) throws Exception {
+    //TODO does not return byte[]....
+    public byte[] annotate2(String pNote, File pFile) throws Exception {
+        PDStream wAnnotatedStream = null;
+        PDDocument document = null;
+        FileOutputStream fos = null;
+        try {
+            document = PDDocument.load(pFile);
+            PDPage wNote = new PDPage();
+            document.addPage(wNote);
+            PDFont font = PDType1Font.HELVETICA_BOLD;
+            PDPageContentStream contentStream = new PDPageContentStream(document, wNote);
+            contentStream.beginText();
+            contentStream.setFont(font, 12);
+            contentStream.moveTextPositionByAmount(100, 700);
+            contentStream.drawString(pNote);
+            contentStream.endText();
+            contentStream.close();
+//            wAnnotatedStream = new PDStream(document);
+//            return wAnnotatedStream.toByteArray();
+            return null;
+        } catch (IOException e) {
+            throw new Exception("You failed to upload because the file was empty.");
+        } finally {
+            document.close();
+        }
+    }
 
-        //TODO handle all in streaming no files on disk....this is not scallable.
-        //TODO why ReactJs is sending a file much bigger bo
+    public File annotateAndStore(String pNote, String pDirectory, MultipartFile pFile) throws Exception {
 
+        File wReturnedFile = null;
         UUID wUuid = UUID.randomUUID();
         String wUploadFileName = wUuid + "_" + pFile.getOriginalFilename();
         String wNoteFileName = wUuid + "_note.pdf";
@@ -168,8 +185,7 @@ public class StampService {
             fos = new FileOutputStream(wUploadFileName);
             fos.write(pFile.getBytes());
             fos.close();
-            // create note pdf
-            // Create a document and add a page to it
+
             PDDocument document = new PDDocument();
             PDPage page = new PDPage();
             document.addPage(page);
@@ -183,6 +199,7 @@ public class StampService {
             contentStream.close();
             document.save(wNoteFileName);
             document.close();
+
             // merge
             List<InputStream> locations = new ArrayList<>();
             locations.add(new FileInputStream(wNoteFileName));
@@ -192,21 +209,56 @@ public class StampService {
             PDFmerger.addSources(locations);
             PDFmerger.setDestinationStream(out);
             PDFmerger.mergeDocuments();
-            System.out.println("Documents merged");
             //delete intermediate files
             File wFile = new File(wNoteFileName);
             wFile.delete();
             wFile = new File(wUploadFileName);
             wFile.delete();
             //store in destination
-            uploadFile(true, new File(wMergedFileName));
+            wReturnedFile = new File(wMergedFileName);
+//            uploadFile(true, );
 
         } catch (IOException e) {
             throw new Exception("You failed to upload because the file was empty.");
         } finally {
-            return "Done";
+            return wReturnedFile;
         }
     }
 
+    public File annotate(String pNote, File pFile) throws IOException{
+        //Loading an existing document
+        PDDocument document = PDDocument.load(pFile);
 
+        //Retrieving the pages of the document
+        PDPage page = document.getPage(1);
+        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+        //Begin the Content stream
+        contentStream.beginText();
+
+        //Setting the font to the Content stream
+        contentStream.setFont(PDType1Font.TIMES_ROMAN, 12);
+
+        //Setting the position for the line
+        contentStream.newLineAtOffset(25, 500);
+
+        //Adding text in the form of string
+        contentStream.showText(pNote);
+
+        //Ending the content stream
+        contentStream.endText();
+
+        //Closing the content stream
+        contentStream.close();
+
+        //Saving the document
+        File wAnnotatedFile = new File("annotated.pdf");
+        document.setAllSecurityToBeRemoved(true);
+        document.save(wAnnotatedFile);
+
+        //Closing the document
+        document.close();
+
+        return wAnnotatedFile;
+    }
 }

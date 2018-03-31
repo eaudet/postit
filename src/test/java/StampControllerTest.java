@@ -11,12 +11,14 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -48,9 +50,6 @@ public class StampControllerTest {
     public void after() throws Exception {
     }
 
-
-    //TODO adjust testing
-
     @Test
     public void test() throws Exception {
 
@@ -60,8 +59,25 @@ public class StampControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.fileUpload("/notes/annotate")
                 .file(firstFile)
                 .param("note", "une notes").param("directory", "/Users/erickaudet/dev/postit"))
-                .andExpect(status().is(200))
-                .andExpect(content().string("success"));
+                .andExpect(status().is(200));
+    }
+
+
+    @Test
+    public void testAnnotate() throws Exception {
+
+        File file = new File("/Users/erickaudet/dev/postit/src/main/resources/original.pdf");
+        FileInputStream fis = new FileInputStream(file);
+        MockMultipartFile firstFile = new MockMultipartFile("data", "original.pdf", MediaType.APPLICATION_PDF_VALUE, fis);
+        //TODO check if return value is a pdf with annotation.
+        MvcResult wMvcResult = mockMvc.perform(MockMvcRequestBuilders.fileUpload("/notes/annotate2")
+                .file(firstFile)
+                .param("note", "une note"))
+                .andExpect(status().is(200)).andReturn();
+        FileOutputStream fos = new FileOutputStream( "tested.pdf" );
+        fos.write( wMvcResult.getResponse().getContentAsByteArray());
+        fos.close();
+
     }
 
 
