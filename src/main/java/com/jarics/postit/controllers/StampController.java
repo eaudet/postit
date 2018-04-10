@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 
 @RestController
@@ -37,39 +38,24 @@ public class StampController {
         return wNote;
     }
 
-    //TODO should return the file. The use should be able to redirect to the cloud drive of his choice...
     @CrossOrigin
     @RequestMapping(value = "/annotate", method = RequestMethod.POST)
     @ResponseBody
-    public String annotate(@RequestParam(value = "note") String pNote,
-                           @RequestParam(value = "directory") String pDirectory,
-                           @RequestParam(value = "data", required = false) List<MultipartFile> files) throws Exception {
-        stampService.annotateAndStore(pNote, pDirectory, files.get(0));
-        return "success";
-    }
-
-    @CrossOrigin
-    @RequestMapping(value = "/annotate2", method = RequestMethod.POST)
-    @ResponseBody
     public ResponseEntity<Resource> merge(@RequestParam(value = "note") String pNote,
                                           @RequestParam(value = "data", required = false) List<MultipartFile> files) throws Exception {
-
-
         HttpHeaders headers = new HttpHeaders();
-
-        File wUploadedFile = new File( files.get(0).getOriginalFilename() );
+        UUID wUuid = UUID.randomUUID();
+        File wUploadedDirs = new File("/tmp/uploads");
+        if (!wUploadedDirs.exists())
+            wUploadedDirs.mkdirs();
+        File wUploadedFile = new File( "/tmp/uploads/"+files.get(0).getOriginalFilename() );
         files.get(0).transferTo(wUploadedFile);
-
         File wAnnotatedFile = stampService.annotate(pNote, wUploadedFile);
-
-//        FileUtils.writeByteArrayToFile(new File("annotated_before_return.pdf"), aFile.getB);
-
+        wUploadedFile.delete();
         headers.setContentType(MediaType.parseMediaType("application/pdf"));
         headers.setContentDispositionFormData("filename", wAnnotatedFile.getName());
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-
         ByteArrayResource resource = new ByteArrayResource( FileUtils.readFileToByteArray(wAnnotatedFile) );
-
         return ResponseEntity.ok()
                 .headers(headers)
                 .contentLength(resource.contentLength())

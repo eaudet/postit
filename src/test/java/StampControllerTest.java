@@ -51,30 +51,17 @@ public class StampControllerTest {
     }
 
     @Test
-    public void test() throws Exception {
-
-        File file = new File("/Users/erickaudet/dev/postit/src/main/resources/original.pdf");
-        FileInputStream fis = new FileInputStream(file);
-        MockMultipartFile firstFile = new MockMultipartFile("data", "original.pdf", MediaType.APPLICATION_PDF_VALUE, fis);
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/notes/annotate")
-                .file(firstFile)
-                .param("note", "une notes").param("directory", "/Users/erickaudet/dev/postit"))
-                .andExpect(status().is(200));
-    }
-
-
-    @Test
     public void testAnnotate() throws Exception {
 
         File file = new File("/Users/erickaudet/dev/postit/src/main/resources/original.pdf");
         FileInputStream fis = new FileInputStream(file);
         MockMultipartFile firstFile = new MockMultipartFile("data", "original.pdf", MediaType.APPLICATION_PDF_VALUE, fis);
         //TODO check if return value is a pdf with annotation.
-        MvcResult wMvcResult = mockMvc.perform(MockMvcRequestBuilders.fileUpload("/notes/annotate2")
+        MvcResult wMvcResult = mockMvc.perform(MockMvcRequestBuilders.fileUpload("/notes/annotate")
                 .file(firstFile)
                 .param("note", "une note"))
                 .andExpect(status().is(200)).andReturn();
-        FileOutputStream fos = new FileOutputStream( "tested.pdf" );
+        FileOutputStream fos = new FileOutputStream( "tested_from_test.pdf" );
         fos.write( wMvcResult.getResponse().getContentAsByteArray());
         fos.close();
 

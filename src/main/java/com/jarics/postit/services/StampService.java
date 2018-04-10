@@ -94,6 +94,7 @@ public class StampService {
         return null;
     }
 
+    @Deprecated
     public File mergeAndStore(String pNote, String pDirectory, MultipartFile pFileA) throws Exception {
 
         //TODO handle all in streaming no files on disk....this is not scallable.
@@ -143,85 +144,6 @@ public class StampService {
 
         } catch (IOException e) {
             throw new Exception("You failed to upload because the file was empty.");
-        }
-    }
-
-    //TODO does not return byte[]....
-    public byte[] annotate2(String pNote, File pFile) throws Exception {
-        PDStream wAnnotatedStream = null;
-        PDDocument document = null;
-        FileOutputStream fos = null;
-        try {
-            document = PDDocument.load(pFile);
-            PDPage wNote = new PDPage();
-            document.addPage(wNote);
-            PDFont font = PDType1Font.HELVETICA_BOLD;
-            PDPageContentStream contentStream = new PDPageContentStream(document, wNote);
-            contentStream.beginText();
-            contentStream.setFont(font, 12);
-            contentStream.moveTextPositionByAmount(100, 700);
-            contentStream.drawString(pNote);
-            contentStream.endText();
-            contentStream.close();
-//            wAnnotatedStream = new PDStream(document);
-//            return wAnnotatedStream.toByteArray();
-            return null;
-        } catch (IOException e) {
-            throw new Exception("You failed to upload because the file was empty.");
-        } finally {
-            document.close();
-        }
-    }
-
-    public File annotateAndStore(String pNote, String pDirectory, MultipartFile pFile) throws Exception {
-
-        File wReturnedFile = null;
-        UUID wUuid = UUID.randomUUID();
-        String wUploadFileName = wUuid + "_" + pFile.getOriginalFilename();
-        String wNoteFileName = wUuid + "_note.pdf";
-        String wMergedFileName = wUuid + "_merged.pdf";
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(wUploadFileName);
-            fos.write(pFile.getBytes());
-            fos.close();
-
-            PDDocument document = new PDDocument();
-            PDPage page = new PDPage();
-            document.addPage(page);
-            PDFont font = PDType1Font.HELVETICA_BOLD;
-            PDPageContentStream contentStream = new PDPageContentStream(document, page);
-            contentStream.beginText();
-            contentStream.setFont(font, 12);
-            contentStream.moveTextPositionByAmount(100, 700);
-            contentStream.drawString(pNote);
-            contentStream.endText();
-            contentStream.close();
-            document.save(wNoteFileName);
-            document.close();
-
-            // merge
-            List<InputStream> locations = new ArrayList<>();
-            locations.add(new FileInputStream(wNoteFileName));
-            locations.add(new FileInputStream(wUploadFileName));
-            PDFMergerUtility PDFmerger = new PDFMergerUtility();
-            OutputStream out = new FileOutputStream(wMergedFileName);
-            PDFmerger.addSources(locations);
-            PDFmerger.setDestinationStream(out);
-            PDFmerger.mergeDocuments();
-            //delete intermediate files
-            File wFile = new File(wNoteFileName);
-            wFile.delete();
-            wFile = new File(wUploadFileName);
-            wFile.delete();
-            //store in destination
-            wReturnedFile = new File(wMergedFileName);
-//            uploadFile(true, );
-
-        } catch (IOException e) {
-            throw new Exception("You failed to upload because the file was empty.");
-        } finally {
-            return wReturnedFile;
         }
     }
 
